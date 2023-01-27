@@ -1,11 +1,14 @@
 import database from './src/database/index.js'
-database.setup()
-
-import appConfig from './src/config/app.js'
+import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-import express from 'express'
+import apiRouter from './src/routes/api.js'
+import appConfig from './src/config/app.js'
+
+database.setup()
+
 const app = express()
+
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(cors({
@@ -20,8 +23,6 @@ app.use(cors({
         'Content-Type'
     ],
 }));
-
-import apiRouter from './src/routes/api.js'
 app.use('/api', apiRouter)
 
 app.listen(appConfig.PORT, () => {
