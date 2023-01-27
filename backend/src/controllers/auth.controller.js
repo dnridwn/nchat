@@ -116,7 +116,7 @@ const register = async function(req, res) {
         return res.status(200)
             .json({
                 status: 'error',
-                message: 'Username alredy used by other user'
+                message: 'Username already used by other user'
             })
     }
 
@@ -125,7 +125,7 @@ const register = async function(req, res) {
         return res.status(200)
             .json({
                 status: 'error',
-                message: 'Email alredy used by other user'
+                message: 'Email already used by other user'
             })
     }
 
