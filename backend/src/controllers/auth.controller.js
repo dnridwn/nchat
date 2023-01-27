@@ -45,7 +45,7 @@ const login = async function(req, res) {
         token: crypto.randomBytes(20).toString('hex')
     }
 
-    ApiToken.create(apiTokenInfo, (err) => {
+    ApiToken.create(apiTokenInfo, err => {
         if (err) {
             return res.status(200)
                 .json({
@@ -146,7 +146,7 @@ const register = async function(req, res) {
         password: passwordHash
     }
 
-    User.create(userInfo, (err) => {
+    User.create(userInfo, err => {
         if (err) {
             return res.status(200)
                 .json({
