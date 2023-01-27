@@ -1,3 +1,4 @@
+
 # NChat
 
 Chat Application with Full Javascript as main language
@@ -20,3 +21,9 @@ Chat Application with Full Javascript as main language
 ## Authors
 
 - [@dnridwn](https://www.github.com/dnridwn)
+
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
