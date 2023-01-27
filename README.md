@@ -6,7 +6,7 @@ Chat Application with Full Javascript as main language
 
 ## Features
 
-- User register/login
+- User Register and Login
 - Personal Chat
 - Group Chat
 - Sharing Status
