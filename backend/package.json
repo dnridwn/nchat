@@ -12,7 +12,7 @@
     "url": "git+https://github.com/dnridwn/nchat.git"
   },
   "author": "Den Ridwan Saputra",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/dnridwn/nchat/issues"
   },
