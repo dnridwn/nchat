@@ -7,4 +7,6 @@ const router = express.Router()
 router.get('/login', AuthMiddleware.login, AuthController.login)
 router.get('/register', AuthMiddleware.register, AuthController.register)
 
+router.use(AuthMiddleware.isAuthenticated)
+
 export default router
