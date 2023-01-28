@@ -5,22 +5,7 @@ import ApiToken from '../models/api-token.model.js'
 
 const login = async function(req, res) {
     const username = req.body?.username || null
-    if (username == null || username.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Please fill username!'
-            })
-    }
-
     const password = req.body?.password || null
-    if (password == null || password.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Please fill password!'
-            })
-    }
 
     const user = await User.where({ username }).findOne()
     if (user == null || user == undefined) {
@@ -67,50 +52,11 @@ const login = async function(req, res) {
 
 const register = async function(req, res) {
     const firstname = req.body?.firstname || null
-    if (firstname == null || firstname.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Please fill firstname!'
-            })
-    }
-
     const lastname = req.body?.lastname || null
-    if (lastname == null || lastname.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Please fill lastname!'
-            })
-    }
-
     const username = req.body?.username || null
-    if (username == null || username.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Please fill username!'
-            })
-    }
-
     const email = req.body?.email || null
-    if (email == null || email.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Please fill email!'
-            })
-    }
-
     const password = req.body?.password || null
-    if (password == null || password.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Please fill password!'
-            })
-    }
-
+    
     const userWithSameUsername = await User.where({ username }).findOne()
     if (userWithSameUsername) {
         return res.status(200)
