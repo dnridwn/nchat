@@ -10,6 +10,7 @@ Chat Application with Full Javascript as main language
 - Personal Chat
 - Group Chat
 - Sharing Status
+- Push Notification
 - And many more (coming soon)
 
 
