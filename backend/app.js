@@ -1,4 +1,4 @@
-import database from './src/database/index.js'
+import database from './src/helpers/database.helper.js'
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
