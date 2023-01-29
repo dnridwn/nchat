@@ -7,7 +7,7 @@ Chat Application with Full Javascript as main language
 ## Features
 
 - User Register and Login
-- User send/receive friend request
+- User Send/Receive Friend Request
 - Personal Chat
 - Group Chat
 - Sharing Status
