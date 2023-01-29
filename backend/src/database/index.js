@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import databaseConfig from '../config/database.js'
+import databaseConfig from '../config/database.config.js'
 
 const setup = function() {
     mongoose.connect(`mongodb://${databaseConfig.DB_HOST}:${databaseConfig.DB_PORT}/${databaseConfig.DB_NAME}`, {

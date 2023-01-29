@@ -2,9 +2,9 @@ import database from './src/database/index.js'
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-import apiRouter from './src/routes/api.js'
-import webRouter from './src/routes/web.js'
-import appConfig from './src/config/app.js'
+import apiRouter from './src/routes/api.route.js'
+import webRouter from './src/routes/web.route.js'
+import appConfig from './src/config/app.config.js'
 
 database.setup()
 

@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
 import fs from 'fs'
 import handlebars from 'handlebars'
-import smtpConfig from '../config/smtp.js'
+import smtpConfig from '../config/smtp.config.js'
 
 const transporter = nodemailer.createTransport({
     host: smtpConfig.SMTP_HOST,

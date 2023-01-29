@@ -4,7 +4,7 @@ import User from '../../models/user.model.js'
 import ApiToken from '../../models/api-token.model.js'
 import EmailVerificationToken from '../../models/email-verification-token.model.js'
 import EmailHelper from '../../helpers/email.helper.js'
-import appConfig from '../../config/app.js'
+import appConfig from '../../config/app.config.js'
 import moment from 'moment'
 
 const login = async function(req, res) {
@@ -120,7 +120,7 @@ const register = async function(req, res) {
     EmailHelper.sendEmail({
         to: user.email,
         subject: 'NChat - Verify Your Account',
-        html: 'verification.html',
+        html: 'verification.template.html',
         replacements: {
             name: `${user.firstname} ${user.lastname}`,
             verification_target_url: `${appConfig.APP_URL}/user/verify`,
