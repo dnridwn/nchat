@@ -1,6 +1,6 @@
 import Validator from 'validatorjs'
-import ApiToken from '../models/api-token.model.js'
-import User from '../models/user.model.js'
+import ApiToken from '../../models/api-token.model.js'
+import User from '../../models/user.model.js'
 
 const login = function(req, res, next) {
     const data = req.body
@@ -83,4 +83,34 @@ const isAuthenticated = async function(req, res, next) {
     return next()
 }
 
-export default { login, register, isAuthenticated }
+const isVerified = async function(req, res, next) {
+    const userId = req.user_id || null
+    if (userId == null || userId == '') {
+        return res.status(404)
+            .json({
+                status: 'error',
+                message: 'Your account is not verified (1)'
+            })
+    }
+
+    const user = await User.where({ _id: userId }).findOne()
+    if (user == null || user.length == 0) {
+        return res.status(403)
+            .json({
+                status: 'error',
+                message: 'Your account is not verified (2)'
+            })
+    }
+
+    if (user.email_verified_at == undefined || user.email_verified_at == null || user.email_verified_at.length == 0) {
+        return res.status(403)
+            .json({
+                status: 'error',
+                message: 'Your account is not verified (3)'
+            })
+    }
+
+    return next()
+}
+
+export default { login, register, isAuthenticated, isVerified }

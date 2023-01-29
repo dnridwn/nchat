@@ -2,15 +2,7 @@ import mongoose from 'mongoose'
 import moment from 'moment'
 
 const fields = {
-    firstname: {
-        type: String,
-        required: true
-    },
-    lastname: {
-        type: String,
-        required: true
-    },
-    username: {
+    user_id: {
         type: String,
         required: true,
         index: true
@@ -20,12 +12,10 @@ const fields = {
         required: true,
         index: true
     },
-    email_verified_at: {
-        type: Date
-    },
-    password: {
+    token: {
         type: String,
-        required: true
+        required: true,
+        index: true
     }
 }
 
@@ -35,5 +25,5 @@ const options = {
     }
 }
 
-const User = mongoose.Schema(fields, options)
-export default mongoose.model('users', User)
+const EmailVerificationToken = mongoose.Schema(fields, options)
+export default mongoose.model('email_verification_tokens', EmailVerificationToken)

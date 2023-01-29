@@ -1,7 +1,11 @@
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
-import User from '../models/user.model.js'
-import ApiToken from '../models/api-token.model.js'
+import User from '../../models/user.model.js'
+import ApiToken from '../../models/api-token.model.js'
+import EmailVerificationToken from '../../models/email-verification-token.model.js'
+import EmailHelper from '../../helpers/email.helper.js'
+import appConfig from '../../config/app.js'
+import moment from 'moment'
 
 const login = async function(req, res) {
     const username = req.body?.username || null
@@ -84,29 +88,51 @@ const register = async function(req, res) {
             })
     }
 
-    const userInfo = {
+    const user = await User.create({
         firstname,
         lastname,
         username,
         email,
+        email_verified_at: null,
         password: passwordHash
-    }
-
-    User.create(userInfo, err => {
-        if (err) {
-            return res.status(200)
-                .json({
-                    status: 'error',
-                    message: 'Register failed! Please try again later (2)'
-                })
-        }
-
+    })
+    if (user == null || user.length == 0) {
         return res.status(200)
             .json({
-                status: 'success',
-                message: 'Register successfully! Please login to continue'
+                status: 'error',
+                message: 'Register failed! Please try again later (2)'
             })
+    }
+
+    const emailVerificationToken = await EmailVerificationToken.create({
+        user_id: user._id,
+        email: user.email,
+        token: crypto.randomBytes(20).toString('hex')
     })
+    if (emailVerificationToken == null || emailVerificationToken.length == 0) {
+        return res.status(200)
+            .json({
+                status: 'error',
+                message: 'Failed to prepare for verification email!'
+            })
+    }
+
+    EmailHelper.sendEmail({
+        to: user.email,
+        subject: 'NChat - Verify Your Account',
+        html: 'verification.html',
+        replacements: {
+            name: `${user.firstname} ${user.lastname}`,
+            verification_target_url: `${appConfig.APP_URL}/user/verify`,
+            token: emailVerificationToken.token
+        }
+    })
+
+    return res.status(200)
+        .json({
+            status: 'success',
+            message: 'Register successfully! Please check your email to verify your account'
+        })
 }
 
 export default { login, register }

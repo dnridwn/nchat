@@ -3,6 +3,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import apiRouter from './src/routes/api.js'
+import webRouter from './src/routes/web.js'
 import appConfig from './src/config/app.js'
 
 database.setup()
@@ -24,6 +25,7 @@ app.use(cors({
     ],
 }));
 app.use('/api', apiRouter)
+app.use('/', webRouter)
 
 app.listen(appConfig.PORT, () => {
     console.log(`APP RUNNING ON PORT ${appConfig.PORT}`)
