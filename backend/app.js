@@ -1,4 +1,4 @@
-import database from './src/helpers/database.helper.js'
+import databaseHelper from './src/helpers/database.helper.js'
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
@@ -6,7 +6,7 @@ import apiRouter from './src/routes/api.route.js'
 import webRouter from './src/routes/web.route.js'
 import appConfig from './src/config/app.config.js'
 
-database.setup()
+databaseHelper.setup()
 
 const app = express()
 

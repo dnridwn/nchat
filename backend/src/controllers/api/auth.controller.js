@@ -3,7 +3,7 @@ import crypto from 'crypto'
 import User from '../../models/user.model.js'
 import ApiToken from '../../models/api-token.model.js'
 import EmailVerificationToken from '../../models/email-verification-token.model.js'
-import EmailHelper from '../../helpers/email.helper.js'
+import emailHelper from '../../helpers/email.helper.js'
 import appConfig from '../../config/app.config.js'
 import moment from 'moment'
 
@@ -117,7 +117,7 @@ const register = async function(req, res) {
             })
     }
 
-    EmailHelper.sendEmail({
+    emailHelper.sendEmail({
         to: user.email,
         subject: 'NChat - Verify Your Account',
         html: 'verification.template.html',
