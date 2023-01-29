@@ -5,7 +5,6 @@ import ApiToken from '../../models/api-token.model.js'
 import EmailVerificationToken from '../../models/email-verification-token.model.js'
 import emailHelper from '../../helpers/email.helper.js'
 import appConfig from '../../config/app.config.js'
-import moment from 'moment'
 
 const login = async function(req, res) {
     const username = req.body?.username || null
@@ -29,29 +28,29 @@ const login = async function(req, res) {
         })
     }
 
-    const apiTokenInfo = {
-        user_id: user._id,
-        token: crypto.randomBytes(20).toString('hex')
-    }
-
-    ApiToken.create(apiTokenInfo, err => {
-        if (err) {
-            return res.status(200)
-                .json({
-                    status: 'error',
-                    message: 'Failed to login! Please try again later'
-                })
-        }
-
+    const apiToken = await ApiToken.create({
+        token: crypto.randomBytes(20).toString('hex'),
+        user
+    })
+    if (apiToken == undefined || apiToken == null || apiToken.length == 0) {
         return res.status(200)
             .json({
-                status: 'success',
-                message: 'Successfully logged in!',
-                data: {
-                    token: apiTokenInfo.token
-                }
+                status: 'error',
+                message: 'Failed to login! Please try again later'
             })
-    })
+    }
+
+    const updateUser = { $push: { api_tokens: apiToken } }
+    await User.findOneAndUpdate({ _id: user._id }, updateUser, { new: true })
+
+    return res.status(200)
+        .json({
+            status: 'success',
+            message: 'Successfully logged in!',
+            data: {
+                token: apiToken.token
+            }
+        })
 }
 
 const register = async function(req, res) {
@@ -105,9 +104,8 @@ const register = async function(req, res) {
     }
 
     const emailVerificationToken = await EmailVerificationToken.create({
-        user_id: user._id,
-        email: user.email,
-        token: crypto.randomBytes(20).toString('hex')
+        token: crypto.randomBytes(20).toString('hex'),
+        user
     })
     if (emailVerificationToken == null || emailVerificationToken.length == 0) {
         return res.status(200)
@@ -116,6 +114,9 @@ const register = async function(req, res) {
                 message: 'Failed to prepare for verification email!'
             })
     }
+
+    const updateUser = { $push: { email_verification_tokens: emailVerificationToken } }
+    await User.findOneAndUpdate({ _id: user._id }, updateUser, { new: true })
 
     emailHelper.sendEmail({
         to: user.email,

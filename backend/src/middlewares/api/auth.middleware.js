@@ -61,7 +61,7 @@ const isAuthenticated = async function(req, res, next) {
             })
     }
 
-    const apiToken = await ApiToken.where({ token }).findOne()
+    const apiToken = await ApiToken.where({ token }).findOne().populate('user')
     if (apiToken == null || apiToken.length == 0) {
         return res.status(403)
             .json({
@@ -70,7 +70,7 @@ const isAuthenticated = async function(req, res, next) {
             })
     }
 
-    const user = await User.where({ _id: apiToken.user_id }).findOne()
+    const user = apiToken.user
     if (user == null || user.length == 0) {
         return res.status(403)
             .json({
@@ -79,13 +79,13 @@ const isAuthenticated = async function(req, res, next) {
             })
     }
 
-    req.user_id = user._id
+    req.auth_user = user
     return next()
 }
 
 const isVerified = async function(req, res, next) {
-    const userId = req.user_id || null
-    if (userId == null || userId == '') {
+    const authUser = req.auth_user
+    if (authUser == null || authUser == '') {
         return res.status(404)
             .json({
                 status: 'error',
@@ -93,20 +93,11 @@ const isVerified = async function(req, res, next) {
             })
     }
 
-    const user = await User.where({ _id: userId }).findOne()
-    if (user == null || user.length == 0) {
+    if (authUser.email_verified_at == undefined || authUser.email_verified_at == null || authUser.email_verified_at.length == 0) {
         return res.status(403)
             .json({
                 status: 'error',
                 message: 'Your account is not verified (2)'
-            })
-    }
-
-    if (user.email_verified_at == undefined || user.email_verified_at == null || user.email_verified_at.length == 0) {
-        return res.status(403)
-            .json({
-                status: 'error',
-                message: 'Your account is not verified (3)'
             })
     }
 

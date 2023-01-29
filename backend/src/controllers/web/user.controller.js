@@ -8,12 +8,12 @@ const verify = async function(req, res) {
         return res.sendStatus(404)
     }
 
-    const emailVerificationToken = await EmailVerificationToken.where({ token }).findOne()
+    const emailVerificationToken = await EmailVerificationToken.where({ token }).findOne().populate('user')
     if (emailVerificationToken == undefined || emailVerificationToken == null || emailVerificationToken.length == 0) {
         return res.sendStatus(404)
     }
 
-    const user = await User.where({ _id: emailVerificationToken.user_id }).findOne()
+    const user = emailVerificationToken.user
     if (user == undefined || user == null || user.length == 0) {
         return res.sendStatus(404)
     }

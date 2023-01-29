@@ -1,21 +1,15 @@
-import mongoose from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import moment from 'moment'
 
 const fields = {
-    user_id: {
-        type: String,
-        required: true,
-        index: true
-    },
-    email: {
-        type: String,
-        required: true,
-        index: true
-    },
     token: {
         type: String,
         required: true,
         index: true
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: 'users'
     }
 }
 

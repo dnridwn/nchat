@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import moment from 'moment'
 
 const fields = {
@@ -26,7 +26,15 @@ const fields = {
     password: {
         type: String,
         required: true
-    }
+    },
+    api_tokens: [{
+        type: Schema.Types.ObjectId,
+        ref: 'api_tokens',
+    }],
+    email_verification_tokens: [{
+        type: Schema.Types.ObjectId,
+        ref: 'email_verification_tokens',
+    }]
 }
 
 const options = {
