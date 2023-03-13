@@ -1,14 +1,19 @@
-import bcrypt from 'bcrypt'
-import crypto from 'crypto'
-import User from '../../models/user.model.js'
-import EmailVerificationToken from '../../models/email-verification-token.model.js'
-import emailHelper from '../../helpers/email.helper.js'
+// import config
 import appConfig from '../../config/app.config.js'
-import ValidatorService from '../../services/validator.service.js'
 
-import loginValidation from '../../validations/login.validation.js'
+// import services
+import ValidatorService from '../../services/validator.service.js'
 import UserService from '../../services/user.service.js'
 import ApiTokenService from '../../services/api-token.service.js'
+import EmailVerificationTokenService from '../../services/email-verification-token.service.js'
+
+// import validation
+import registerValidation from '../../validations/register.validation.js'
+import loginValidation from '../../validations/login.validation.js'
+
+// import helper
+import passwordHelper from '../../helpers/password.helper.js'
+import emailHelper from '../../helpers/email.helper.js'
 
 const login = async function(req, res) {
     new ValidatorService(
@@ -28,7 +33,7 @@ const login = async function(req, res) {
 
     UserService
         .findByUsername(username)
-        .then(user => {
+        .then((user) => {
             if (!UserService.validatePassword(user, password)) {
                 res.json({
                     status: 'error',
@@ -38,7 +43,7 @@ const login = async function(req, res) {
 
             ApiTokenService
                 .create(user)
-                .then(apiToken => {
+                .then((apiToken) => {
                     UserService.registerToken(user._id, apiToken)
                     res.json({
                         status: 'success',
@@ -48,14 +53,14 @@ const login = async function(req, res) {
                         }
                     })
                 })
-                .catch(error => {
+                .catch((error) => {
                     res.json({
                         status: 'error',
                         message: error
                     })
                 })
         })
-        .catch(error => {
+        .catch((error) => {
             res.json({
                 status: 'error',
                 message: error
@@ -64,85 +69,80 @@ const login = async function(req, res) {
 }
 
 const register = async function(req, res) {
+    new ValidatorService(
+            req?.body,
+            registerValidation.rules,
+            registerValidation.error_messages
+        )
+        .fails((error) => {
+            res.json({
+                status: 'error',
+                message: error
+            })
+        })
+
+
     const firstname = req.body?.firstname || null
     const lastname = req.body?.lastname || null
     const username = req.body?.username || null
     const email = req.body?.email || null
     const password = req.body?.password || null
-    
-    const userWithSameUsername = await User.where({ username }).findOne()
-    if (userWithSameUsername) {
-        return res.status(200)
-            .json({
+
+    UserService
+        .findByUsername(username)
+        .then(() => {
+            res.json({
                 status: 'error',
                 message: 'Username already used by other user'
             })
-    }
+        })
+        .catch(() => {
+            UserService
+                .findByEmail(email)
+                .then(() => {
+                    res.json({
+                        status: 'error',
+                        message: 'Email already used by other user'
+                    })
+                })
+                .catch(() => {
+                    const hashedPassword = passwordHelper.hash(password)
+                    UserService.create({ firstname, lastname, username, email, hashedPassword })
+                        .then(user => {
+                            EmailVerificationTokenService
+                                .create(user)
+                                .then(emailVerificationToken => {
+                                    UserService.registerEmailVerificationToken(user._id, emailVerificationToken)
+                                    emailHelper.sendEmail({
+                                        to: user.email,
+                                        subject: `${appConfig.APP_NAME} - Verify Your Account`,
+                                        html: 'verification.template.html',
+                                        replacements: {
+                                            name: `${user.firstname} ${user.lastname}`,
+                                            verification_target_url: `${appConfig.APP_URL}/user/verify`,
+                                            token: emailVerificationToken.token
+                                        }
+                                    })
 
-    const userWithSameEmail = await User.where({ email }).findOne()
-    if (userWithSameEmail) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Email already used by other user'
-            })
-    }
-
-    const passwordHash = bcrypt.hashSync(password, 10)
-    if (!passwordHash) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Register failed! Please try again later (1)'
-            })
-    }
-
-    const user = await User.create({
-        firstname,
-        lastname,
-        username,
-        email,
-        email_verified_at: null,
-        password: passwordHash
-    })
-    if (user == null || user.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Register failed! Please try again later (2)'
-            })
-    }
-
-    const emailVerificationToken = await EmailVerificationToken.create({
-        token: crypto.randomBytes(20).toString('hex'),
-        user
-    })
-    if (emailVerificationToken == null || emailVerificationToken.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Failed to prepare for verification email!'
-            })
-    }
-
-    const updateUser = { $push: { email_verification_tokens: emailVerificationToken } }
-    await User.findOneAndUpdate({ _id: user._id }, updateUser, { new: true })
-
-    emailHelper.sendEmail({
-        to: user.email,
-        subject: 'NChat - Verify Your Account',
-        html: 'verification.template.html',
-        replacements: {
-            name: `${user.firstname} ${user.lastname}`,
-            verification_target_url: `${appConfig.APP_URL}/user/verify`,
-            token: emailVerificationToken.token
-        }
-    })
-
-    return res.status(200)
-        .json({
-            status: 'success',
-            message: 'Register successfully! Please check your email to verify your account'
+                                    res.json({
+                                        status: 'success',
+                                        message: 'Register successfully! Please check your email to verify your account'
+                                    })
+                                })
+                                .catch(() => {
+                                    res.json({
+                                        status: 'error',
+                                        message: 'Failed when sending verification email to your email account'
+                                    })
+                                })
+                        })
+                        .catch(() => {
+                            res.json({
+                                status: 'error',
+                                message: 'Failed when registering your account'
+                            })
+                        })
+                })
         })
 }
 
