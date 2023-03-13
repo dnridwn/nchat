@@ -1,29 +1,5 @@
 import Validator from 'validatorjs'
 import ApiToken from '../../models/api-token.model.js'
-import User from '../../models/user.model.js'
-
-const login = function(req, res, next) {
-    const data = req.body
-    const rules = {
-        username: 'required|string',
-        password: 'required|string'
-    }
-    const customErrorMessages = {
-        required: 'Please fill :attribute',
-        string: 'The :attribute only accept text'
-    }
-
-    const validation = new Validator(data, rules, customErrorMessages)
-    if (validation.fails()) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: validation.errors.first(Object.keys(validation.errors.errors)[0])
-            })
-    }
-
-    return next()
-}
 
 const register = function(req, res, next) {
     const data = req.body
@@ -104,4 +80,4 @@ const isVerified = async function(req, res, next) {
     return next()
 }
 
-export default { login, register, isAuthenticated, isVerified }
+export default { register, isAuthenticated, isVerified }

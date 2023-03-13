@@ -1,55 +1,65 @@
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import User from '../../models/user.model.js'
-import ApiToken from '../../models/api-token.model.js'
 import EmailVerificationToken from '../../models/email-verification-token.model.js'
 import emailHelper from '../../helpers/email.helper.js'
 import appConfig from '../../config/app.config.js'
+import ValidatorService from '../../services/validator.service.js'
+
+import loginValidation from '../../validations/login.validation.js'
+import UserService from '../../services/user.service.js'
+import ApiTokenService from '../../services/api-token.service.js'
 
 const login = async function(req, res) {
+    new ValidatorService(
+            req?.body,
+            loginValidation.rules,
+            loginValidation.error_messages
+        )
+        .fails((error) => {
+            res.json({
+                status: 'error',
+                message: error
+            })
+        })
+
     const username = req.body?.username || null
     const password = req.body?.password || null
 
-    const user = await User.where({ username }).findOne()
-    if (user == null || user == undefined) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'We could not find any user! Please check your login details'
-            })
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password)
-    if (!isPasswordValid) {
-        return res.status(200)
-        .json({
-            status: 'error',
-            message: 'Your password is incorrect! Please check your login details'
-        })
-    }
-
-    const apiToken = await ApiToken.create({
-        token: crypto.randomBytes(20).toString('hex'),
-        user
-    })
-    if (apiToken == undefined || apiToken == null || apiToken.length == 0) {
-        return res.status(200)
-            .json({
-                status: 'error',
-                message: 'Failed to login! Please try again later'
-            })
-    }
-
-    const updateUser = { $push: { api_tokens: apiToken } }
-    await User.findOneAndUpdate({ _id: user._id }, updateUser, { new: true })
-
-    return res.status(200)
-        .json({
-            status: 'success',
-            message: 'Successfully logged in!',
-            data: {
-                token: apiToken.token
+    UserService
+        .findByUsername(username)
+        .then(user => {
+            if (!UserService.validatePassword(user, password)) {
+                res.json({
+                    status: 'error',
+                    message: 'Password incorrect'
+                })
             }
+
+            ApiTokenService
+                .create(user)
+                .then(apiToken => {
+                    UserService.registerToken(user._id, apiToken)
+                    res.json({
+                        status: 'success',
+                        message: 'Successfully logged in!',
+                        data: {
+                            token: apiToken.token
+                        }
+                    })
+                })
+                .catch(error => {
+                    res.json({
+                        status: 'error',
+                        message: error
+                    })
+                })
+        })
+        .catch(error => {
+            res.json({
+                status: 'error',
+                message: error
+            })
         })
 }
 

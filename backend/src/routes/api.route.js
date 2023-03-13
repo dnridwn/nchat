@@ -4,9 +4,10 @@ import AuthMiddleware from '../middlewares/api/auth.middleware.js';
 
 const router = express.Router()
 
-router.get('/login', AuthMiddleware.login, AuthController.login)
-router.get('/register', AuthMiddleware.register, AuthController.register)
+router.post('/login', AuthController.login)
+router.post('/register', AuthMiddleware.register, AuthController.register)
 
 router.use(AuthMiddleware.isAuthenticated)
+router.get('contact')
 
 export default router
